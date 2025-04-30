@@ -15,13 +15,13 @@ function shipday_post_orders(array $payloads) {
 			if ($response['http_code'] != 200) {
                 shipday_logger('error', 'Post failed for API key: '.$api_key);
             }
-			if ($shipday_debug_flag == true) shipday_post_order(
-                array(
-                    'payload' => $payload,
-                    'response' => $response
-                ),
-                $api_key, get_shipday_debug_api_url()
-            );
+//			if ($shipday_debug_flag == true) shipday_post_order(
+//                array(
+//                    'payload' => $payload,
+//                    'response' => $response
+//                ),
+//                $api_key, get_shipday_debug_api_url()
+//            );
 		}
 	}
     return $success;

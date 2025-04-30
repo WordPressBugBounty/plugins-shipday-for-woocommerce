@@ -10,7 +10,7 @@ function shipday_post_orders(array $payloads) {
     foreach ($payloads as $api_key => $payload_array) {
         $api_key = trim($api_key);
 		foreach ($payload_array as $payload){
-			$response = shipday_post_order($payload, $api_key, get_shipday_debug_api_url());
+			$response = shipday_post_order($payload, $api_key, get_shipday_api_url());
             $success |= ($response['http_code'] == 200);
 			if ($response['http_code'] != 200) {
                 shipday_logger('error', 'Post failed for API key: '.$api_key);

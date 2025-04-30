@@ -1,7 +1,7 @@
 <?php
 
 /** Global Variables */
-$debug_url = 'https://webhook.site/111f7e81-1112-4ed4-bd1a-b2ea008636d6';
+$debug_url = '';
 $shipday_debug_flag = false;
 
 /** Functions */

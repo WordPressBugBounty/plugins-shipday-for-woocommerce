@@ -1,12 +1,19 @@
 <?php
+
 require_once dirname(__DIR__). '/functions/logger.php';
 require_once dirname(__DIR__). '/functions/common.php';
 require_once dirname(__DIR__). '/dispatch_post/post_fun.php';
+require_once dirname(__DIR__). '/dispatch_post/payload_post.php';
 
 require_once dirname(__DIR__). '/order_data/Woo_Order_Shipday.php';
 require_once dirname(__DIR__). '/order_data/Dokan_Order_Shipday.php';
 require_once dirname(__DIR__). '/order_data/WCFM_Order_Shipday.php';
 require_once dirname(__DIR__). '/order_data/FoodStore_Order_Shipday.php';
+
+require_once dirname(__DIR__). '/payload/Woo_Payload.php';
+require_once dirname(__DIR__). '/payload/Dokan_Payload.php';
+require_once dirname(__DIR__). '/payload/FoodStore_Payload.php';
+require_once dirname(__DIR__). '/payload/WCFM_Payload.php';
 
 require_once dirname(__DIR__). '/date-modifiers/order_delivery_date.php';
 
@@ -15,6 +22,8 @@ class Shipday_Order_Management {
 
     public static function init() {
 		add_action('woocommerce_order_status_processing', __CLASS__.'::process_and_send');
+        add_action( 'woocommerce_order_status_cancelled', __CLASS__ . '::handle_cancel' );
+
 	}
     public static function map_to_transient($order_id) {
         return 'shipday_order_posted'.$order_id;
@@ -32,7 +41,33 @@ class Shipday_Order_Management {
         set_transient(self::map_to_transient($order_id), false, self::$persistance_time);
     }
 
+    public static function handle_cancel( $order_id) {
+        shipday_logger('info', $order_id.': Shipday Order Management Process cancelled order');
+        self::unregister_as_posted($order_id);
+        $woo = new Woo_Payload($order_id);
+        $payload = $woo->getPayload();
+        $payload['event'] = 'cancelled';
+        shipday_logger('info', 'Sending woo cancel payload. '.$payload['message']);
+        send_cancel_payload($payload);
+    }
+
 	public static function process_and_send($order_id) {
+
+        try {
+            //if (get_shipday_webhook_enabled()) {
+                if (self::is_duplicate($order_id)) {
+                    shipday_logger('info', $order_id.': Duplicate order, skipping shipday order management process');
+                    return ;
+                }
+                self::send_payload($order_id);
+                self::register_as_posted($order_id);
+                return;
+            //}
+        } catch (Exception $exception) {
+            shipday_logger('error', 'New webhook failed : '.$exception->getMessage());
+        }
+
+        shipday_logger('INFO', "Fall back to old shipday-api for sending order");
 
         if (self::is_duplicate($order_id)) return ;
         self::register_as_posted($order_id);
@@ -90,4 +125,30 @@ class Shipday_Order_Management {
         }
 
 	}
+
+    public static function send_payload($order_id) {
+        if ( is_plugin_active( 'dokan-lite/dokan.php' )) {
+            $dokan = new Dokan_Payload($order_id);
+            $payload = $dokan->getPayload();
+            send_single_vendor_payload($payload);
+            shipday_logger('info', 'Sent dokan payload. '.$payload['message']);
+        }
+        elseif ( is_plugin_active( 'wc-multivendor-marketplace/wc-multivendor-marketplace.php' )) {
+            $wcfm = new WCFM_Payload($order_id);
+            $payload = $wcfm->getPayload();
+            send_multi_vendor_payload($payload);
+            shipday_logger('info', 'Sent WCFM payload. '.$payload['message']);
+        }
+        elseif (is_plugin_active('food-store/food-store.php')){
+            $foodStore = new FoodStore_Payload($order_id);
+            $payload = $foodStore->getPayload();
+            shipday_logger('info', 'Sent food-store payload. '.$payload['message']);
+            send_single_vendor_payload($payload);
+        } else {
+            $woo = new Woo_Payload($order_id);
+            $payload = $woo->getPayload();
+            shipday_logger('info', 'Sent woo payload. '.$payload['message']);
+            send_single_vendor_payload($payload);
+        }
+    }
 }

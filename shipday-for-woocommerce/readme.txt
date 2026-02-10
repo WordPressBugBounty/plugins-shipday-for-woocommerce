@@ -6,7 +6,7 @@ Tested up to: 6.8
 WC requires at least: 7.0.0
 WC tested up to: 9.8.2
 Requires PHP: 7.4
-Stable tag: 2.0.0
+Stable tag: 2.1.0
 License: GPLv2 or later
 
 == Description ==
@@ -92,11 +92,6 @@ If you need assistance or have any questions, contact us at <support@shipday.com
 
 
 == Installation ==
-**Latest Version:** 2.0.0 includes [Native Datetime support and Admin configuration]
-
-**Need the previous stable version?** Users can download version 1.9.1 from the plugin's Advanced View page on WordPress.org if they experience any issues with 2.0.0.
-
-
 You can install shipday plugin directly from wordpress plugin repository or manually upload to your site. Follow one of the following process.
 #### Wordpress Plugin directory
 1. In your wordpress admin dashboard, go to plugins and select add new plugins.
@@ -116,7 +111,8 @@ You can install shipday plugin directly from wordpress plugin repository or manu
 
 == Changelog ==
 
-= 2.0.0 =
+= 2.1.0 =
+* Language support template
 * Datetime support in the order checkout
 * New admin configuration page
 

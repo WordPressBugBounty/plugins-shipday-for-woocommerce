@@ -6,7 +6,7 @@ Tested up to: 6.8
 WC requires at least: 7.0.0
 WC tested up to: 9.8.2
 Requires PHP: 7.4
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 License: GPLv2 or later
 
 == Description ==
@@ -111,9 +111,9 @@ You can install shipday plugin directly from wordpress plugin repository or manu
 
 == Changelog ==
 
-= 2.1.0 =
+= 2.1.1 =
+* Minor fix for language support
 * Language support template
 * Datetime support in the order checkout
-* New admin configuration page
 
 
